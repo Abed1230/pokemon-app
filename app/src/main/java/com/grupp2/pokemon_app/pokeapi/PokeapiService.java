@@ -11,7 +11,7 @@ import retrofit2.http.Query;
 public interface PokeapiService {
 
     @GET("pokemon")
-    Call<PokemonResponse> obtainPokemonList(@Query("limit") int limit, @Query("offset") int offset);
+    Call<PokemonResponse> obtainPokemonList(@Query("limit") int limit);
 
     @GET("pokemon/{name}")
     Call<PokemonModel> obtainPokemon(@Path("name") String name);

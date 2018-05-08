@@ -21,11 +21,14 @@ public class PokemonListAdapter extends RecyclerView.Adapter<PokemonListAdapter.
     private ArrayList<Pokemon> dataset;
     private ArrayList<Pokemon> datasetFull;
     private Context context;
+    private PokemonAdapterListener listener;
 
-    public PokemonListAdapter(Context context){
+    public PokemonListAdapter(Context context, PokemonAdapterListener listenerr){
         this.context = context;
         dataset = new ArrayList<>();
         datasetFull = dataset;
+        listener = listenerr;
+
     }
 
     public interface PokemonAdapterListener {
@@ -49,6 +52,8 @@ public class PokemonListAdapter extends RecyclerView.Adapter<PokemonListAdapter.
                 .crossFade()
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(holder.photoImageView);
+
+
     }
 
     @Override
@@ -69,6 +74,13 @@ public class PokemonListAdapter extends RecyclerView.Adapter<PokemonListAdapter.
             super(itemView);
             photoImageView = (ImageView) itemView.findViewById(R.id.photoImageView);
             nameTextView = (TextView) itemView.findViewById(R.id.nameTextView);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onPokemonSelected(dataset.get(getAdapterPosition()));
+                }
+            });
         }
     }
 

@@ -3,6 +3,7 @@ package com.grupp2.pokemon_app;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -37,7 +38,6 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
     private PokemonListAdapter pokemonListAdapter;
     private int offset;
     private boolean b;
-    private int number;
     private SearchView searchView;
 
     @Override
@@ -45,37 +45,12 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent intent = getIntent();
-        number = intent.getIntExtra("number", 0);
-
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
-        pokemonListAdapter = new PokemonListAdapter(this);
+        pokemonListAdapter = new PokemonListAdapter(this, this);
         recyclerView.setAdapter(pokemonListAdapter);
         recyclerView.setHasFixedSize(true);
         final GridLayoutManager layoutManager = new GridLayoutManager(this, 3);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                if(dy > 0){
-                    int visibleItemCount = layoutManager.getChildCount();
-                    int totalItemCount = layoutManager.getItemCount();
-                    int pastVisibleItems = layoutManager.findFirstVisibleItemPosition();
-
-                    if(b){
-                        if((visibleItemCount + pastVisibleItems) >= totalItemCount){
-                            Log.i(TAG, " Last one.");
-
-                            b = false;
-                            offset +=200;
-                            obtainData(offset);
-                        }
-                    }
-                }
-            }
-        });
 
         retrofit = new Retrofit.Builder()
                 .baseUrl("http://pokeapi.co/api/v2/")
@@ -91,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
     }
 
     private void obtainData(int offset){
-        Call<PokemonResponse> pokemonResponseCall = service.obtainPokemonList(20, offset);
+        Call<PokemonResponse> pokemonResponseCall = service.obtainPokemonList(949);
 
         pokemonResponseCall.enqueue(new Callback<PokemonResponse>() {
             @Override
@@ -114,58 +89,39 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
         });
     }
 
-    private void obtainPokemon(String name) {
-        Call<PokemonModel> pokemonResponseCall = service.obtainPokemon(name);
-        pokemonResponseCall.enqueue(new Callback<PokemonModel>() {
-            @Override
-            public void onResponse(Call<PokemonModel> call, Response<PokemonModel> response) {
-                if (response.isSuccessful()) {
-                    PokemonModel pokemon = response.body();
-                    String s = "id: " + pokemon.getId() + " name: " + pokemon.getName() +
-                            " height: " + pokemon.getHeight() + " weight: " + pokemon.getWeight();
-                    Toast.makeText(MainActivity.this, "Pokemon: \n" + s, Toast.LENGTH_LONG).show();
-                } else {
-                    Log.e(TAG, " onResponse: " + response.errorBody());
+
+        @Override
+        public boolean onCreateOptionsMenu (Menu menu){
+            getMenuInflater().inflate(R.menu.menu_main, menu);
+
+            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            searchView = (SearchView) menu.findItem(R.id.action_search)
+                    .getActionView();
+            searchView.setSearchableInfo(searchManager
+                    .getSearchableInfo(getComponentName()));
+            searchView.setMaxWidth(Integer.MAX_VALUE);
+
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    // filter recycler view when query submitted
+                    pokemonListAdapter.getFilter().filter(query);
+                    return false;
                 }
-            }
 
-            @Override
-            public void onFailure(Call<PokemonModel> call, Throwable t) {
-                Log.e(TAG, " onFailure: " + t.getMessage());
-            }
-        });
+                @Override
+                public boolean onQueryTextChange(String query) {
+                    // filter recycler view when text is changed
+                    pokemonListAdapter.getFilter().filter(query);
+                    return false;
+                }
+            });
+            return true;
+        }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-
-
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView = (SearchView) menu.findItem(R.id.action_search)
-                .getActionView();
-        searchView.setSearchableInfo(searchManager
-                .getSearchableInfo(getComponentName()));
-        searchView.setMaxWidth(Integer.MAX_VALUE);
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                // filter recycler view when query submitted
-                pokemonListAdapter.getFilter().filter(query);
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String query) {
-                // filter recycler view when text is changed
-                pokemonListAdapter.getFilter().filter(query);
-                return false;
-            }
-        });
-        return true;
+        public void onPokemonSelected (Pokemon p){
+            Snackbar snackbar = Snackbar.make(recyclerView, "Selected " + p.getName(), Snackbar.LENGTH_LONG);
+            snackbar.show();
+        }
     }
 
-    public void onPokemonSelected(Pokemon p) {
-
-    }
-}
