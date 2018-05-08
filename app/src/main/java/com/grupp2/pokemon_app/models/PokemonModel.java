@@ -1,10 +1,12 @@
 package com.grupp2.pokemon_app.models;
 
+import java.io.Serializable;
+
 /**
  * Created by Abed on 05/08/2018.
  */
 
-public class PokemonModel {
+public class PokemonModel implements Serializable {
 
     private int id;
     private String name;
