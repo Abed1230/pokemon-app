@@ -8,12 +8,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.grupp2.pokemon_app.models.Pokemon;
+import com.grupp2.pokemon_app.models.PokemonModel;
 import com.grupp2.pokemon_app.models.PokemonResponse;
 import com.grupp2.pokemon_app.pokeapi.PokeapiService;
 
@@ -29,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
 
     private static final String TAG = "POKEDEX";
     private Retrofit retrofit;
+    private PokeapiService service;
     private RecyclerView recyclerView;
     private PokemonListAdapter pokemonListAdapter;
     private int offset;
@@ -78,14 +82,16 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
+        service = retrofit.create(PokeapiService.class);
+
         b = true;
         offset = 0;
         obtainData(offset);
+
     }
 
     private void obtainData(int offset){
-        PokeapiService service = retrofit.create(PokeapiService.class);
-        Call<PokemonResponse> pokemonResponseCall = service.obtainPokemonList(200, offset);
+        Call<PokemonResponse> pokemonResponseCall = service.obtainPokemonList(20, offset);
 
         pokemonResponseCall.enqueue(new Callback<PokemonResponse>() {
             @Override
@@ -108,6 +114,26 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
         });
     }
 
+    private void obtainPokemon(String name) {
+        Call<PokemonModel> pokemonResponseCall = service.obtainPokemon(name);
+        pokemonResponseCall.enqueue(new Callback<PokemonModel>() {
+            @Override
+            public void onResponse(Call<PokemonModel> call, Response<PokemonModel> response) {
+                if (response.isSuccessful()) {
+                    PokemonModel pokemon = response.body();
+                    String s = "id: " + pokemon.getId() + " name: " + pokemon.getName() +
+                            " height: " + pokemon.getHeight() + " weight: " + pokemon.getWeight();
+                    Toast.makeText(MainActivity.this, "Pokemon: \n" + s, Toast.LENGTH_LONG).show();
+                } else {
+                    Log.e(TAG, " onResponse: " + response.errorBody());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PokemonModel> call, Throwable t) {
+                Log.e(TAG, " onFailure: " + t.getMessage());
+            }
+        });
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
