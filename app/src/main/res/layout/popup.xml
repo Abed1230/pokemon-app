@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="450dp"
+    android:layout_gravity="center"
+    android:background="@drawable/pokemon_gradient">
+
+    <TextView
+        android:layout_marginTop="16dp"
+        android:id="@+id/idTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ID"
+        android:textAllCaps="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"/>
+
+    <ImageView
+        android:layout_below="@id/idTextView"
+        android:layout_marginTop="16dp"
+        android:id="@+id/photoImageView"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_marginTop="16dp"
+        android:id="@+id/nameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/photoImageView"
+        android:layout_centerHorizontal="true"
+        android:text="@string/app_name"
+        android:textSize="24sp"
+        android:textAllCaps="true" />
+
+    <TextView
+        android:layout_marginTop="8dp"
+        android:id="@+id/weightTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/nameTextView"
+        android:layout_centerHorizontal="true"
+        android:textSize="18sp"
+        android:text="Weight"/>
+
+    <TextView
+        android:layout_marginTop="8dp"
+        android:id="@+id/heightTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/weightTextView"
+        android:layout_centerHorizontal="true"
+        android:text="Height"
+        android:textSize="18sp"/>
+
+</RelativeLayout>
