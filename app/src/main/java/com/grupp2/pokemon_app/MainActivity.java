@@ -18,7 +18,9 @@ import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
     private SearchView searchView;
     private Dialog mDialog;
     private ProgressDialog mProgress;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +60,10 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
 
         mDialog = new Dialog(this);
         mProgress = new ProgressDialog(this);
+        mProgress.setMessage("Loading");
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+        progressBar = findViewById(R.id.progressBar);
+
         pokemonListAdapter = new PokemonListAdapter(this, this);
         recyclerView.setAdapter(pokemonListAdapter);
         recyclerView.setHasFixedSize(true);
@@ -73,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
 
         b = true;
         offset = 0;
+
         obtainData(offset);
 
     }
@@ -89,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
                     ArrayList<Pokemon> pokemonList = pokemonResponse.getResults();
 
                     pokemonListAdapter.addPokemonList(pokemonList);
+                    progressBar.setVisibility(View.GONE);
                 }else{
                     Log.e(TAG, " onResponse: " + response.errorBody());
                 }
@@ -98,6 +106,32 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
             public void onFailure(Call<PokemonResponse> call, Throwable t) {
                 b = true;
                 Log.e(TAG, " onFailure: " + t.getMessage());
+            }
+        });
+    }
+
+    private void obtainPokemon(final String name) {
+        Call<PokemonModel> pokemonResponseCall = service.obtainPokemon(name);
+        pokemonResponseCall.enqueue(new Callback<PokemonModel>() {
+            @Override
+            public void onResponse(Call<PokemonModel> call, Response<PokemonModel> response) {
+                if (response.isSuccessful()) {
+                    PokemonModel pokemon = response.body();
+                    String s = "id: " + pokemon.getId() + " name: " + pokemon.getName() +
+                            " height: " + pokemon.getHeight() + " weight: " + pokemon.getWeight();
+
+                    showDialog(pokemon);
+
+                } else {
+                    Toast.makeText(MainActivity.this, "Pokemon not found", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, " onResponse: " + response.errorBody());
+                    mProgress.dismiss();
+                }
+            }
+            @Override
+            public void onFailure(Call<PokemonModel> call, Throwable t) {
+                Log.e(TAG, " onFailure: " + t.getMessage());
+                mProgress.dismiss();
             }
         });
     }
@@ -133,10 +167,12 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
         }
 
         public void onPokemonSelected (Pokemon p){
-            showDialog(p);
+            mProgress.show();
+            obtainPokemon(p.getName());
         }
 
-    private void showDialog(Pokemon pokemon) {
+    private void showDialog(PokemonModel pokemon) {
+        mProgress.dismiss();
         mDialog.setContentView(R.layout.popup);
 
         TextView nameText = mDialog.findViewById(R.id.nameTextView);
@@ -146,10 +182,12 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
         ImageView imageView = mDialog.findViewById(R.id.photoImageView);
 
         nameText.setText(pokemon.getName());
-        idText.setText("ID: " + String.valueOf(pokemon.getNumber()));
+        idText.setText("ID: " + String.valueOf(pokemon.getId()));
+        heightText.setText("Height: " + String.valueOf(pokemon.getHeight()) + " dm");
+        weightText.setText("Weight: " + String.valueOf(pokemon.getWeight()) + " kg");
 
         Glide.with(this)
-                .load("https://raw.githubusercontent.com/PokeAPI/sprites/968538f4/sprites/pokemon/" + pokemon.getNumber() + ".png")
+                .load("https://raw.githubusercontent.com/PokeAPI/sprites/968538f4/sprites/pokemon/" + pokemon.getId() + ".png")
                 .centerCrop()
                 .crossFade()
                 .diskCacheStrategy(DiskCacheStrategy.ALL)

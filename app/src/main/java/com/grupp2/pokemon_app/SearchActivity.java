@@ -94,11 +94,10 @@ public class SearchActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<PokemonModel> call, Response<PokemonModel> response) {
                 if (response.isSuccessful()) {
-
                     PokemonModel pokemon = response.body();
                     String s = "id: " + pokemon.getId() + " name: " + pokemon.getName() +
                             " height: " + pokemon.getHeight() + " weight: " + pokemon.getWeight();
-                    Toast.makeText(SearchActivity.this, s, Toast.LENGTH_LONG).show();
+                    //Toast.makeText(SearchActivity.this, s, Toast.LENGTH_LONG).show();
 
                     showDialog(pokemon);
 
@@ -130,8 +129,8 @@ public class SearchActivity extends AppCompatActivity {
 
         nameText.setText(pokemon.getName());
         idText.setText("ID: " + String.valueOf(pokemon.getId()));
-        heightText.setText("Height: " + String.valueOf(pokemon.getHeight()) + "dm");
-        weightText.setText("Weight: " + String.valueOf(pokemon.getWeight()) + "kg");
+        heightText.setText("Height: " + String.valueOf(pokemon.getHeight()) + " dm");
+        weightText.setText("Weight: " + String.valueOf(pokemon.getWeight()) + " kg");
 
         Glide.with(this)
                 .load("https://raw.githubusercontent.com/PokeAPI/sprites/968538f4/sprites/pokemon/" + pokemon.getId() + ".png")
