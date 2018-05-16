@@ -1,8 +1,12 @@
 package com.grupp2.pokemon_app;
 
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -14,8 +18,12 @@ import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.grupp2.pokemon_app.models.Pokemon;
 import com.grupp2.pokemon_app.models.PokemonModel;
 import com.grupp2.pokemon_app.models.PokemonResponse;
@@ -39,12 +47,16 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
     private int offset;
     private boolean b;
     private SearchView searchView;
+    private Dialog mDialog;
+    private ProgressDialog mProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mDialog = new Dialog(this);
+        mProgress = new ProgressDialog(this);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         pokemonListAdapter = new PokemonListAdapter(this, this);
         recyclerView.setAdapter(pokemonListAdapter);
@@ -67,14 +79,15 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
 
     private void obtainData(int offset){
         Call<PokemonResponse> pokemonResponseCall = service.obtainPokemonList(949);
-
         pokemonResponseCall.enqueue(new Callback<PokemonResponse>() {
+
             @Override
             public void onResponse(Call<PokemonResponse> call, Response<PokemonResponse> response) {
                 b = true;
                 if(response.isSuccessful()){
                     PokemonResponse pokemonResponse = response.body();
                     ArrayList<Pokemon> pokemonList = pokemonResponse.getResults();
+
                     pokemonListAdapter.addPokemonList(pokemonList);
                 }else{
                     Log.e(TAG, " onResponse: " + response.errorBody());
@@ -120,8 +133,33 @@ public class MainActivity extends AppCompatActivity implements PokemonListAdapte
         }
 
         public void onPokemonSelected (Pokemon p){
-            Snackbar snackbar = Snackbar.make(recyclerView, "Selected " + p.getName(), Snackbar.LENGTH_LONG);
-            snackbar.show();
+            showDialog(p);
         }
+
+    private void showDialog(Pokemon pokemon) {
+        mDialog.setContentView(R.layout.popup);
+
+        TextView nameText = mDialog.findViewById(R.id.nameTextView);
+        TextView idText = mDialog.findViewById(R.id.idTextView);
+        TextView weightText = mDialog.findViewById(R.id.weightTextView);
+        TextView heightText = mDialog.findViewById(R.id.heightTextView);
+        ImageView imageView = mDialog.findViewById(R.id.photoImageView);
+
+        nameText.setText(pokemon.getName());
+        idText.setText("ID: " + String.valueOf(pokemon.getNumber()));
+
+        Glide.with(this)
+                .load("https://raw.githubusercontent.com/PokeAPI/sprites/968538f4/sprites/pokemon/" + pokemon.getNumber() + ".png")
+                .centerCrop()
+                .crossFade()
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(imageView);
+
+
+        mDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        mDialog.show();
+
+    }
+
     }
 

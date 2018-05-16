@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.grupp2.pokemon_app.models.Pokemon;
+import com.grupp2.pokemon_app.models.PokemonModel;
 
 import java.util.ArrayList;
 
@@ -28,7 +29,6 @@ public class PokemonListAdapter extends RecyclerView.Adapter<PokemonListAdapter.
         dataset = new ArrayList<>();
         datasetFull = dataset;
         listener = listenerr;
-
     }
 
     public interface PokemonAdapterListener {
@@ -52,7 +52,6 @@ public class PokemonListAdapter extends RecyclerView.Adapter<PokemonListAdapter.
                 .crossFade()
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(holder.photoImageView);
-
 
     }
 
@@ -94,7 +93,7 @@ public class PokemonListAdapter extends RecyclerView.Adapter<PokemonListAdapter.
                     dataset = datasetFull;
                 } else {
                     ArrayList<Pokemon> filteredList = new ArrayList<>();
-                    for (Pokemon row : dataset) {
+                    for (Pokemon row : datasetFull) {
 
                         // name match condition. this might differ depending on your requirement
                         if (row.getName().toLowerCase().contains(charString.toLowerCase())) {
