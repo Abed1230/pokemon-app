@@ -129,8 +129,8 @@ public class SearchActivity extends AppCompatActivity {
 
         nameText.setText(pokemon.getName());
         idText.setText("ID: " + String.valueOf(pokemon.getId()));
-        heightText.setText("Height: " + String.valueOf(pokemon.getHeight()) + " dm");
-        weightText.setText("Weight: " + String.valueOf(pokemon.getWeight()) + " kg");
+        heightText.setText("Height: " + String.valueOf(pokemon.getHeight()/10.0) + " m");
+        weightText.setText("Weight: " + String.valueOf(pokemon.getWeight()/10.0) + " kg");
 
         Glide.with(this)
                 .load("https://raw.githubusercontent.com/PokeAPI/sprites/968538f4/sprites/pokemon/" + pokemon.getId() + ".png")
